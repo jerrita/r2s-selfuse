@@ -71,6 +71,17 @@ jobs:
     #     mixkey: ${{ env.TARGET_DEVICE_ARCH }}
     #     prefix: ${{ github.workspace }}/lede
 
+    - name: Cache Build
+      uses: actions/cache@v3
+      with:
+        key: TiSATO
+        path: |
+          lede/tools
+          lede/toolchain
+          lede/target
+          lede/staging_dir
+          lede/build_dir
+
     - name: Make Download
       run: |
         df -h
@@ -89,6 +100,7 @@ jobs:
 
     - name: If Error
       if: steps.compileopenwrt.outcome == 'failure'
+      continue-on-error: true
       run: |
         df -h
         cat lede/.config
