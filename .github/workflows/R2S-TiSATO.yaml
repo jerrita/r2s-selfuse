@@ -36,7 +36,7 @@ jobs:
     - name: Prepare Package
       run: |
         cd lede
-        cp -r ./scripts/. .
+        cp -r ../scripts/. .
         /bin/bash 02-Package.sh
 
     - name: Make Config
