@@ -29,7 +29,7 @@ jobs:
       run: |
         echo "Now files:"
         ls
-        sudo chown -R runner:runner /home/runner/work/r2s_test
+        sudo chown -R runner:runner /home/runner/work
         cp -r ./scripts/. .
         /bin/bash 01-GetRepo.sh
 
