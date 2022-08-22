@@ -1,9 +1,9 @@
 name: R2S-LEDE
 
 on:
-  # push:
-  #   branches:
-  #     - master
+  push:
+    branches:
+      - master
   workflow_dispatch:
 
 jobs:
@@ -29,14 +29,14 @@ jobs:
       run: |
         echo "Now files:"
         ls
-        # sudo chown -R runner:runner /home/runner/work/r2s_test
+        sudo chown -R runner:runner /home/runner/work/r2s_test
         cp -r ./scripts/. .
         /bin/bash 01-GetRepo.sh
 
     - name: Prepare Package
       run: |
         cd lede
-        cp -r ./scripts/. 
+        cp -r ./scripts/. .
         /bin/bash 02-Package.sh
 
     - name: Make Config
