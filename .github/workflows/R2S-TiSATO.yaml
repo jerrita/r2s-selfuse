@@ -1,0 +1,113 @@
+name: R2S-LEDE
+
+on:
+  # push:
+  #   branches:
+  #     - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    if: github.event.repository.owner.id == github.event.sender.id
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+    - name: Show system
+      run: |
+        echo -e "Total CPU cores\t: $(nproc)"
+        cat /proc/cpuinfo | grep 'model name'
+        free -h
+        uname -a
+        [ -f /proc/version ] && cat /proc/version
+        [ -f /etc/issue.net ] && cat /etc/issue.net
+        [ -f /etc/issue ] && cat /etc/issue
+        ulimit -a
+
+    - name: PreCompile
+      run: |
+        echo "Now files:"
+        ls
+        # sudo chown -R runner:runner /home/runner/work/r2s_test
+        cp -r ./scripts/. .
+        /bin/bash 01-GetRepo.sh
+
+    - name: Prepare Package
+      run: |
+        cd lede
+        cp -r ./scripts/. 
+        /bin/bash 02-Package.sh
+
+    - name: Make Config
+      run: |
+        cd lede
+        mv ../seeds .config
+        #echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config
+        make defconfig
+
+    # - name: Cache
+    #   uses: klever1988/cachewrtbuild@test
+    #   with:
+    #     ccache: 'true'
+    #     mixkey: ${{ env.TARGET_DEVICE_ARCH }}
+    #     prefix: ${{ github.workspace }}/lede
+
+    - name: Make Download
+      run: |
+        df -h
+        cd lede
+        make download -j50
+
+    - name: Compile
+      id: compileopenwrt
+      continue-on-error: true
+      run: |
+        df -h
+        cd lede
+        make -j$(($(nproc) + 1)) || make -j$(($(nproc) + 1)) V=s
+        echo $?
+
+    - name: If Error
+      if: steps.compileopenwrt.outcome == 'failure'
+      run: |
+        cat lede/.config
+        echo '================================================================'
+        cd lede && make -j1 V=s
+
+    - name: Print Disk Space After
+      run: df -h
+
+    - name: Organize files
+      id: organize
+      run: |
+        rm -rf ./artifact/
+        mkdir -p ./artifact/
+        mv lede/bin/targets/rockchip/armv8/*sysupgrade.img* ./artifact/
+        cd ./artifact/
+        ls -Ahl
+        gzip -d *.gz && exit 0
+        gzip --best *.img
+        ls -Ahl
+        # sha256sum lede*r2s* | tee R2S-TiSATO-$(date +%Y-%m-%d)-${{ env.rls_tag }}.sha256sum
+        # zip R2S-TiSATO-$(date +%Y-%m-%d)-${{ env.rls_tag }}-ext4.zip *r2s*ext4*
+        zip R2S-TiSATO-$(date +%Y-%m-%d)-${{ env.rls_tag }}-sfs.zip *r2s*squashfs*
+        ls -Ahl
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@main
+      with:
+        name: TiSATO_${{ env.rls_tag }}
+        path: ./artifact/
+
+    - name: Create release
+      id: create_release
+      uses: ncipollo/release-action@v1.8.0
+      with:
+        name: TiSATO_${{ env.rls_tag }}
+        allowUpdates: true
+        tag: ${{ env.rls_tag }}
+        commit: master
+        replacesArtifacts: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: ./artifact/*.gz
