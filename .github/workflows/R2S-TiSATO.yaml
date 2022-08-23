@@ -96,6 +96,7 @@ jobs:
 
     - name: If Error
       if: steps.compileopenwrt.outcome == 'failure'
+      id: estatus
       run: |
         df -h
         cat lede/.config
@@ -103,6 +104,7 @@ jobs:
         cd lede && make -j1 V=s
 
     - name: Print Disk Space After
+      continue-on-error: true
       run: |
         df -h
         echo "========lede/build_dir/target-aarch64_generic_musl/root-rockchip========="
@@ -112,6 +114,7 @@ jobs:
 
     - name: Organize files
       id: organize
+      if: steps.estatus.outcome != 'failure'
       run: |
         rm -rf ./artifact/
         mkdir -p ./artifact/
@@ -127,7 +130,7 @@ jobs:
 
     - name: Upload artifact
       uses: actions/upload-artifact@main
-      if: steps.compiler-if.outcome != 'failure'
+      if: steps.estatus.outcome != 'failure'
       with:
         name: TiSATO_${{ env.rls_tag }}
         path: ./artifact/
@@ -135,6 +138,7 @@ jobs:
     - name: Create release
       id: create_release
       uses: ncipollo/release-action@v1.8.0
+      if: steps.estatus.outcome != 'failure'
       with:
         name: TiSATO_${{ env.rls_tag }}
         allowUpdates: true
