@@ -1,9 +1,9 @@
 name: R2S-LEDE
 
 on:
-  # push:
-  #   branches:
-  #     - master
+  push:
+    branches:
+      - master
   workflow_dispatch:
 
 jobs:
@@ -96,8 +96,6 @@ jobs:
 
     - name: If Error
       if: steps.compileopenwrt.outcome == 'failure'
-      id: compiler-if
-      continue-on-error: true
       run: |
         df -h
         cat lede/.config
@@ -105,7 +103,6 @@ jobs:
         cd lede && make -j1 V=s
 
     - name: Print Disk Space After
-      continue-on-error: true
       run: |
         df -h
         echo "========lede/build_dir/target-aarch64_generic_musl/root-rockchip========="
@@ -114,8 +111,6 @@ jobs:
         tree lede/bin
 
     - name: Organize files
-      if: steps.compiler-if.outcome != 'failure'
-      continue-on-error: true
       id: organize
       run: |
         rm -rf ./artifact/
@@ -126,23 +121,19 @@ jobs:
         gzip -d *.gz && exit 0
         gzip --best *.img
         ls -Ahl
-        # sha256sum lede*r2s* | tee R2S-TiSATO-$(date +%Y-%m-%d)-${{ env.rls_tag }}.sha256sum
-        # zip R2S-TiSATO-$(date +%Y-%m-%d)-${{ env.rls_tag }}-ext4.zip *r2s*ext4*
+        sha256sum openwrt*r2s* | tee R2S-TiSATO-$(date +%Y-%m-%d)-${{ env.rls_tag }}.sha256sum
         zip R2S-TiSATO-$(date +%Y-%m-%d)-${{ env.rls_tag }}-sfs.zip *r2s*squashfs*
         ls -Ahl
 
     - name: Upload artifact
       uses: actions/upload-artifact@main
       if: steps.compiler-if.outcome != 'failure'
-      continue-on-error: true
       with:
         name: TiSATO_${{ env.rls_tag }}
         path: ./artifact/
 
     - name: Create release
       id: create_release
-      if: steps.compiler-if.outcome != 'failure'
-      continue-on-error: true
       uses: ncipollo/release-action@v1.8.0
       with:
         name: TiSATO_${{ env.rls_tag }}
@@ -151,4 +142,4 @@ jobs:
         commit: master
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: ./artifact/*.gz
+        artifacts: ./artifact/*.zip

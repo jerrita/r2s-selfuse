@@ -86,8 +86,6 @@ jobs:
 
     - name: If Error
       if: steps.compileopenwrt.outcome == 'failure'
-      id: compiler-if
-      continue-on-error: true
       run: |
         df -h
         cat openwrt/.config
@@ -95,15 +93,12 @@ jobs:
         cd openwrt && make -j1 V=s
 
     - name: Print Disk Space After
-      continue-on-error: true
       run: |
         df -h
         echo "========openwrt/bin============="
         tree openwrt/bin
 
     - name: Organize files
-      if: steps.compiler-if.outcome != 'failure'
-      continue-on-error: true
       id: organize
       run: |
         rm -rf ./artifact/
@@ -121,16 +116,12 @@ jobs:
 
     - name: Upload artifact
       uses: actions/upload-artifact@main
-      if: steps.compiler-if.outcome != 'failure'
-      continue-on-error: true
       with:
         name: TiSATO_${{ env.rls_tag }}
         path: ./artifact/
 
     - name: Create release
       id: create_release
-      if: steps.compiler-if.outcome != 'failure'
-      continue-on-error: true
       uses: ncipollo/release-action@v1.8.0
       with:
         name: TAKiNA_${{ env.rls_tag }}
@@ -139,4 +130,4 @@ jobs:
         commit: master
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: ./artifact/*.gz
+        artifacts: ./artifact/*.zip
