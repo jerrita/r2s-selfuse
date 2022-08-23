@@ -1,4 +1,4 @@
-name: R2S-LEDE
+name: R2S-OP
 
 on:
   push:
@@ -25,13 +25,13 @@ jobs:
         [ -f /etc/issue ] && cat /etc/issue
         ulimit -a
 
-    - name: Free disk space
-      run: |
-        df -h
-        cp -r ./scripts/. .
-        echo "Cleaning disk..."
-        bash 90-DiskFree.sh > /dev/null 2>&1
-        df -h
+    # - name: Free disk space
+    #   run: |
+    #     df -h
+    #     cp -r ./scripts/. .
+    #     echo "Cleaning disk..."
+    #     bash 90-DiskFree.sh > /dev/null 2>&1
+    #     df -h
 
     # - name: Init build dependencies
     #   env:
@@ -49,18 +49,18 @@ jobs:
         df -h
         sudo chown -R runner:runner /home/runner/work
         cp -r ./scripts/. .
-        /bin/bash 01-GetRepo.sh
+        /bin/bash 11-GetRepo.sh
 
     - name: Prepare Package
       run: |
-        cd lede
+        cd openwrt
         cp -r ../scripts/. .
         /bin/bash 02-Package.sh
 
     - name: Make Config
       run: |
-        cd lede
-        mv ../seeds/r2s-tisato .config
+        cd openwrt
+        mv ../seeds/r2s-takina .config
         echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config
         make defconfig
 
@@ -68,28 +68,18 @@ jobs:
       uses: actions/cache@v3
       id: cache-build
       with:
-        key: TiSATO
+        key: takina
         path: |
-          lede/tools
-          lede/toolchain
-          lede/target
-          lede/staging_dir
-          lede/build_dir
-          lede/feeds
-          lede/package
-
-    - name: Make Download
-      run: |
-        df -h
-        cd lede
-        make download -j$(($(nproc) + 1))
+          openwrt/bin
+          openwrt/build_dir
+          openwrt/staging_dir
 
     - name: Compile
       id: compileopenwrt
       continue-on-error: true
       run: |
         df -h
-        cd lede
+        cd openwrt
         # make -j$(($(nproc) + 1)) || make -j$(($(nproc) + 1)) V=s
         make -j$(($(nproc) + 1))
         echo $?
@@ -100,18 +90,16 @@ jobs:
       continue-on-error: true
       run: |
         df -h
-        cat lede/.config
+        cat openwrt/.config
         echo '================================================================'
-        cd lede && make -j1 V=s
+        cd openwrt && make -j1 V=s
 
     - name: Print Disk Space After
       continue-on-error: true
       run: |
         df -h
-        echo "========lede/build_dir/target-aarch64_generic_musl/root-rockchip========="
-        ls -alh lede/build_dir/target-aarch64_generic_musl/root-rockchip
-        echo "========lede/bin============="
-        tree lede/bin
+        echo "========openwrt/bin============="
+        tree openwrt/bin
 
     - name: Organize files
       if: steps.compiler-if.outcome != 'failure'
@@ -120,15 +108,15 @@ jobs:
       run: |
         rm -rf ./artifact/
         mkdir -p ./artifact/
-        mv lede/bin/targets/rockchip/armv8/*sysupgrade.img* ./artifact/
+        mv openwrt/bin/targets/rockchip/armv8/*sysupgrade.img* ./artifact/
         cd ./artifact/
         ls -Ahl
         gzip -d *.gz && exit 0
         gzip --best *.img
         ls -Ahl
-        # sha256sum lede*r2s* | tee R2S-TiSATO-$(date +%Y-%m-%d)-${{ env.rls_tag }}.sha256sum
-        # zip R2S-TiSATO-$(date +%Y-%m-%d)-${{ env.rls_tag }}-ext4.zip *r2s*ext4*
-        zip R2S-TiSATO-$(date +%Y-%m-%d)-${{ env.rls_tag }}-sfs.zip *r2s*squashfs*
+        sha256sum openwrt*r2s* | tee R2S-TAKiNA-$(date +%Y-%m-%d)-${{ env.rls_tag }}.sha256sum
+        zip R2S-TAKiNA-$(date +%Y-%m-%d)-${{ env.rls_tag }}-ext4.zip *r2s*ext4*
+        zip R2S-TAKiNA-$(date +%Y-%m-%d)-${{ env.rls_tag }}-sfs.zip *r2s*squashfs*
         ls -Ahl
 
     - name: Upload artifact
@@ -145,7 +133,7 @@ jobs:
       continue-on-error: true
       uses: ncipollo/release-action@v1.8.0
       with:
-        name: TiSATO_${{ env.rls_tag }}
+        name: TAKiNA_${{ env.rls_tag }}
         allowUpdates: true
         tag: ${{ env.rls_tag }}
         commit: master
