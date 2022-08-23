@@ -13,8 +13,9 @@ mv ${sdk_name} openwrt
 # Patch feeds
 echo "src-svn acc https://github.com/imy7/luci-app-turboacc/trunk/Lean" >> openwrt/feeds.conf.default
 mkdir -p openwrt/package/feeds/extra
-cd openwrt/package/feeds/extra && git clone https://github.com/mchome/luci-app-vlmcsd
-cd openwrt/package/feeds/extra && git clone https://github.com/mchome/openwrt-vlmcsd
-cd openwrt/package/feeds/extra && git clone https://github.com/rufengsuixing/luci-app-zerotier
+cd openwrt/package/feeds/extra \
+ && git clone https://github.com/mchome/luci-app-vlmcsd \
+ && git clone https://github.com/mchome/openwrt-vlmcsd \
+ && git clone https://github.com/rufengsuixing/luci-app-zerotier
 
 echo "rls_tag=${rls_code}" >> $GITHUB_ENV
