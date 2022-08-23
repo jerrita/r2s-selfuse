@@ -86,12 +86,16 @@ jobs:
 
     - name: If Error
       if: steps.compileopenwrt.outcome == 'failure'
+      run: |
+        df -h
+        echo '================================================================'
+        cat openwrt/.config
+
+    - name: Error Compile
+      if: steps.compileopenwrt.outcome == 'failure'
       id: estatus
       continue-on-error: true
       run: |
-        df -h
-        cat openwrt/.config
-        echo '================================================================'
         cd openwrt && make -j1 V=s
 
     - name: Print Disk Space After
