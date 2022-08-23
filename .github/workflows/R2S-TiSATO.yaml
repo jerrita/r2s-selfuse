@@ -25,24 +25,24 @@ jobs:
         [ -f /etc/issue ] && cat /etc/issue
         ulimit -a
 
-    - name: Free disk space
-      run: |
-        df -h
-        cp -r ./scripts/. .
-        echo "Cleaning disk..."
-        bash 90-DiskFree.sh > /dev/null 2>&1
-        df -h
+    # - name: Free disk space
+    #   run: |
+    #     df -h
+    #     cp -r ./scripts/. .
+    #     echo "Cleaning disk..."
+    #     bash 90-DiskFree.sh > /dev/null 2>&1
+    #     df -h
 
-    - name: Init build dependencies
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        sudo -E rm -rf /etc/apt/sources.list.d
-        sudo -E apt-get update -y
-        sudo -E apt-get install -y build-essential rsync asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core p7zip p7zip-full msmtp libssl-dev texinfo libreadline-dev libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint ccache curl wget vim nano python3 python3-pip python3-ply haveged lrzsz device-tree-compiler scons
-        wget -qO - https://raw.githubusercontent.com/friendlyarm/build-env-on-ubuntu-bionic/master/install.sh | sed 's/python-/python3-/g' | /bin/bash
-        sudo -E apt-get clean -y
-        git config --global user.name 'GitHub Actions' && git config --global user.email 'noreply@github.com'
+    # - name: Init build dependencies
+    #   env:
+    #     DEBIAN_FRONTEND: noninteractive
+    #   run: |
+    #     sudo -E rm -rf /etc/apt/sources.list.d
+    #     sudo -E apt-get update -y
+    #     sudo -E apt-get install -y build-essential rsync asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core p7zip p7zip-full msmtp libssl-dev texinfo libreadline-dev libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint ccache curl wget vim nano python3 python3-pip python3-ply haveged lrzsz device-tree-compiler scons
+    #     wget -qO - https://raw.githubusercontent.com/friendlyarm/build-env-on-ubuntu-bionic/master/install.sh | sed 's/python-/python3-/g' | /bin/bash
+    #     sudo -E apt-get clean -y
+    #     git config --global user.name 'GitHub Actions' && git config --global user.email 'noreply@github.com'
 
     - name: PreCompile
       run: |
@@ -64,15 +64,9 @@ jobs:
         #echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config
         make defconfig
 
-    # - name: Cache
-    #   uses: klever1988/cachewrtbuild@test
-    #   with:
-    #     ccache: 'true'
-    #     mixkey: ${{ env.TARGET_DEVICE_ARCH }}
-    #     prefix: ${{ github.workspace }}/lede
-
     - name: Cache Build
       uses: actions/cache@v3
+      id: cache-build
       with:
         key: TiSATO
         path: |
@@ -100,6 +94,7 @@ jobs:
 
     - name: If Error
       if: steps.compileopenwrt.outcome == 'failure'
+      id: compiler-if
       continue-on-error: true
       run: |
         df -h
@@ -108,9 +103,16 @@ jobs:
         cd lede && make -j1 V=s
 
     - name: Print Disk Space After
-      run: df -h
+      continue-on-error: true
+      run: |
+        df -h
+        echo "========lede/build_dir/target-aarch64_generic_musl/root-rockchip========="
+        ls -alh lede/build_dir/target-aarch64_generic_musl/root-rockchip
+        echo "========lede/bin============="
+        tree lede/bin
 
     - name: Organize files
+      if: steps.compiler-if.outcome != 'failure'
       id: organize
       run: |
         rm -rf ./artifact/
@@ -128,12 +130,14 @@ jobs:
 
     - name: Upload artifact
       uses: actions/upload-artifact@main
+      if: steps.compiler-if.outcome != 'failure'
       with:
         name: TiSATO_${{ env.rls_tag }}
         path: ./artifact/
 
     - name: Create release
       id: create_release
+      if: steps.compiler-if.outcome != 'failure'
       uses: ncipollo/release-action@v1.8.0
       with:
         name: TiSATO_${{ env.rls_tag }}

@@ -5,6 +5,7 @@ sed -i '$a src-git small https://github.com/kenzok8/small' feeds.conf.default
 ./scripts/feeds install -a
 
 sed -i 's,-mcpu=generic,-mcpu=cortex-a53+crypto,g' include/target.mk
+sed -i 's/Os/O3 -funsafe-math-optimizations -funroll-loops -ffunction-sections -fdata-sections -Wl,--gc-sections/g' include/target.mk
 
 # Irqbalance
 sed -i "s/enabled '0'/enabled '1'/g" feeds/packages/utils/irqbalance/files/irqbalance.config
