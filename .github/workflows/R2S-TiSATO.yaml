@@ -64,14 +64,14 @@ jobs:
         # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config
         make defconfig
 
-    - name: Cache Build
-      uses: actions/cache@v3
-      id: cache-build
-      with:
-        key: TiSATO-${{ env.rls_tag }}-v2
-        path: |
-          lede/staging_dir
-          lede/build_dir
+    # - name: Cache Build
+    #   uses: actions/cache@v3
+    #   id: cache-build
+    #   with:
+    #     key: TiSATO-${{ env.rls_tag }}-v2
+    #     path: |
+    #       lede/staging_dir
+    #       lede/build_dir
 
     - name: Make Download
       run: |

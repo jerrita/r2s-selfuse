@@ -1,9 +1,9 @@
 name: R2S-OP-22.03
 
 on:
-  # push:
-  #   branches:
-  #     - master
+  push:
+    branches:
+      - master
   workflow_dispatch:
 
 jobs:
@@ -64,15 +64,21 @@ jobs:
         # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config
         make defconfig
 
-    - name: Cache Build
-      uses: actions/cache@v3
-      id: cache-build
-      with:
-        key: TAKiNA-${{ env.rls_tag }}
-        path: |
-          openwrt/bin
-          openwrt/build_dir
-          openwrt/staging_dir
+    # - name: Cache Build
+    #   uses: actions/cache@v3
+    #   id: cache-build
+    #   with:
+    #     key: TAKiNA-${{ env.rls_tag }}
+    #     path: |
+    #       openwrt/bin
+    #       openwrt/build_dir
+    #       openwrt/staging_dir
+
+    - name: Make Download
+      run: |
+        df -h
+        cd lede
+        make download -j$(($(nproc) + 1))
 
     - name: Compile
       id: compileopenwrt
