@@ -1,9 +1,9 @@
 name: R2S-OP-22.03
 
 on:
-  push:
-    branches:
-      - master
+  # push:
+  #   branches:
+  #     - master
   workflow_dispatch:
 
 jobs:

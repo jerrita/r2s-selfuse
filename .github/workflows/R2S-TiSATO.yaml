@@ -1,9 +1,9 @@
 name: R2S-LEDE
 
 on:
-  # push:
-  #   branches:
-  #     - master
+  push:
+    branches:
+      - master
   workflow_dispatch:
 
 jobs:
@@ -25,13 +25,13 @@ jobs:
         [ -f /etc/issue ] && cat /etc/issue
         ulimit -a
 
-    - name: Free disk space
-      run: |
-        df -h
-        cp -r ./scripts/. .
-        echo "Cleaning disk..."
-        bash 90-DiskFree.sh > /dev/null 2>&1
-        df -h
+    # - name: Free disk space
+    #   run: |
+    #     df -h
+    #     cp -r ./scripts/. .
+    #     echo "Cleaning disk..."
+    #     bash 90-DiskFree.sh > /dev/null 2>&1
+    #     df -h
 
     # - name: Init build dependencies
     #   env:
