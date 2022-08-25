@@ -77,7 +77,7 @@ jobs:
     - name: Make Download
       run: |
         df -h
-        cd lede
+        cd openwrt
         make download -j$(($(nproc) + 1))
 
     - name: Compile
