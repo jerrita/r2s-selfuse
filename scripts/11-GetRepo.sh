@@ -4,29 +4,17 @@
 # sdk_name="openwrt-sdk-21.02.3-rockchip-armv8_gcc-8.4.0_musl.Linux-x86_64"
 
 rls_code="22.03.0-rc6"
-sdk_name="openwrt-sdk-22.03.0-rc6-rockchip-armv8_gcc-11.2.0_musl.Linux-x86_64"
-sdk_file="https://downloads.openwrt.org/releases/${rls_code}/targets/rockchip/armv8/${sdk_name}.tar.xz"
+# sdk_name="openwrt-sdk-22.03.0-rc6-rockchip-armv8_gcc-11.2.0_musl.Linux-x86_64"
+# sdk_file="https://downloads.openwrt.org/releases/${rls_code}/targets/rockchip/armv8/${sdk_name}.tar.xz"
 
-echo "Downloading SDK..."
-wget ${sdk_file} -O sdk.tar.xz > /dev/null 2>&1
-echo "Decompressing..."
-tar xf sdk.tar.xz
-mv ${sdk_name} openwrt-sdk
+# echo "Downloading SDK..."
+# wget ${sdk_file} -O sdk.tar.xz > /dev/null 2>&1
+# echo "Decompressing..."
+# tar xf sdk.tar.xz
+# mv ${sdk_name} openwrt-sdk
 
 echo "Getting Repo..."
 git clone https://github.com/openwrt/openwrt -b openwrt-22.03 --depth=1
-
-rm -rf openwrt/staging_dir
-rm -rf openwrt/build_dir
-rm -rf openwrt/include
-
-mv openwrt-sdk/staging_dir openwrt
-mv openwrt-sdk/build_dir openwrt
-mv openwrt/Makefile openwrt/mk-bak
-mv openwrt-sdk/include openwrt
-# 官方仓库 ucert 有问题，应取消勾选
-# 只能说原 Makefile 很傻逼了
-mv tools/sdk-mk openwrt/Makefile
 
 # Patch feeds
 # Seems donnot need sfe in 21.03
