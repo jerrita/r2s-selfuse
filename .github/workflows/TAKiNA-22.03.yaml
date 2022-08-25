@@ -64,15 +64,15 @@ jobs:
         # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config
         make defconfig
 
-    # - name: Cache Build
-    #   uses: actions/cache@v3
-    #   id: cache-build
-    #   with:
-    #     key: TAKiNA-${{ env.rls_tag }}
-    #     path: |
-    #       openwrt/bin
-    #       openwrt/build_dir
-    #       openwrt/staging_dir
+    - name: Cache Build
+      uses: actions/cache@v3
+      id: cache-build
+      with:
+        key: TAKiNA-${{ env.rls_tag }}-3
+        path: |
+          openwrt/bin
+          openwrt/build_dir
+          openwrt/staging_dir
 
     - name: Make Download
       run: |
