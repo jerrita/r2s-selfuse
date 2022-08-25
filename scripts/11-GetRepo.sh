@@ -10,6 +10,10 @@ echo "Decompressing..."
 tar xf sdk.tar.xz
 mv ${sdk_name} openwrt
 
+# git clone https://github.com/openwrt/openwrt -b openwrt-21.02 --depth=1
+# mv openwrt-sdk/staging_dir openwrt
+# mv openwrt-sdk/build_dir openwrt
+
 # Patch feeds
 # Seems donnot need sfe in 21.03
 # echo "src-svn acc https://github.com/imy7/luci-app-turboacc/trunk/Lean" >> openwrt/feeds.conf.default
