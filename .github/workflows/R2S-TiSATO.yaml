@@ -1,9 +1,9 @@
 name: R2S-LEDE
 
 on:
-  # push:
-  #   branches:
-  #     - master
+  push:
+    branches:
+      - master
   workflow_dispatch:
 
 jobs:
@@ -70,13 +70,8 @@ jobs:
       with:
         key: TiSATO
         path: |
-          lede/tools
-          lede/toolchain
-          lede/target
           lede/staging_dir
           lede/build_dir
-          lede/feeds
-          lede/package
 
     - name: Make Download
       run: |
