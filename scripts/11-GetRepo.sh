@@ -17,9 +17,11 @@ echo "Getting Repo..."
 git clone https://github.com/openwrt/openwrt -b openwrt-22.03 --depth=1
 mv openwrt-sdk/staging_dir openwrt
 mv openwrt-sdk/build_dir openwrt
-mv openwrt-sdk/Makefile openwrt
-mv openwrt-sdl/include openwrt
+mv openwrt/Makefile openwrt/mk-bak
+mv openwrt-sdk/include openwrt
 # 官方仓库 ucert 有问题，应取消勾选
+# 只能说原 Makefile 很傻逼了
+mv tools/sdk-mk openwrt/Makefile
 
 # Patch feeds
 # Seems donnot need sfe in 21.03
