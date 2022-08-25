@@ -68,7 +68,7 @@ jobs:
       uses: actions/cache@v3
       id: cache-build
       with:
-        key: TiSATO
+        key: TiSATO-${{ env.rls_tag }}
         path: |
           lede/staging_dir
           lede/build_dir
