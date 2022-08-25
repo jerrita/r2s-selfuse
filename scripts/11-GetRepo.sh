@@ -15,6 +15,11 @@ mv ${sdk_name} openwrt-sdk
 
 echo "Getting Repo..."
 git clone https://github.com/openwrt/openwrt -b openwrt-22.03 --depth=1
+
+rm -rf openwrt/staging_dir
+rm -rf openwrt/build_dir
+rm -rf openwrt/include
+
 mv openwrt-sdk/staging_dir openwrt
 mv openwrt-sdk/build_dir openwrt
 mv openwrt/Makefile openwrt/mk-bak
