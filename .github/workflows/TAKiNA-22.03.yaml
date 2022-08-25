@@ -1,4 +1,4 @@
-name: R2S-OP
+name: R2S-OP-22.03
 
 on:
   push:
@@ -44,7 +44,7 @@ jobs:
     #     sudo -E apt-get clean -y
     #     git config --global user.name 'GitHub Actions' && git config --global user.email 'noreply@github.com'
 
-    - name: PreCompile
+    - name: Pre Compile
       run: |
         df -h
         sudo chown -R runner:runner /home/runner/work
@@ -60,8 +60,8 @@ jobs:
     - name: Make Config
       run: |
         cd openwrt
-        mv ../seeds/r2s-takina .config
-        echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config
+        mv ../seeds/${{ env.rls_tag }} .config
+        # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config
         make defconfig
 
     - name: Cache Build

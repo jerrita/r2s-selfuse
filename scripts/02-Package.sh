@@ -1,12 +1,15 @@
 sed -i '$a src-git kenzo https://github.com/kenzok8/openwrt-packages' feeds.conf.default
 sed -i '$a src-git small https://github.com/kenzok8/small' feeds.conf.default
 
+# 烦不烦啊
+sed -i 's/src-git-full/src-git/g' feeds.conf.default
+
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
 # We can edit this in menuconfig
-# sed -i 's,-mcpu=generic,-mcpu=cortex-a53+crypto,g' include/target.mk
-# sed -i 's/Os/O3 -funsafe-math-optimizations -funroll-loops -ffunction-sections -fdata-sections -Wl,--gc-sections/g' include/target.mk
+sed -i 's,-mcpu=generic,-mcpu=cortex-a53+crypto,g' include/target.mk
+sed -i 's/Os/O3 -funsafe-math-optimizations -funroll-loops -ffunction-sections -fdata-sections -Wl,--gc-sections/g' include/target.mk
 
 # Irqbalance
 sed -i "s/enabled '0'/enabled '1'/g" feeds/packages/utils/irqbalance/files/irqbalance.config
