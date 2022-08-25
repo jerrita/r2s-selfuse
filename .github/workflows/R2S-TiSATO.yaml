@@ -92,6 +92,7 @@ jobs:
     - name: If Error
       if: steps.compileopenwrt.outcome == 'failure'
       id: estatus
+      continue-on-error: true
       run: |
         df -h
         cat lede/.config
